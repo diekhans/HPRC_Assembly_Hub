@@ -73,20 +73,6 @@ def convert_gff3(ensembl_gff3, gp_file, attrs_tab):
                   ["genePredToBigGenePred", "/dev/stdin", "/dev/stdout"],
                   ["sort", "-k1,1", "-k2,2n"]], stdout=gp_file)
 
-def parse_out_silly_attr(desc, attr):
-    pass
-
-def parse_painful_description(meta):
-    "deal with ensembl encoding non-standard attributes in descriptions"
-    # small nucleolar RNA, H/ACA box 30B [Source:HGNC Symbol;Acc:HGNC:52200];parent_gene_display_xref=SNORA30B
-    # ;parent_gene=ENSG00000273937.1;mapping_type=potential_paralogue
-    desc = meta.get("description")
-    if desc is not None:
-        for attr in ("parent_gene", "mapping_type", "parent_gene_display_xref"):
-            desc, val = parse_out_silly_attr(desc, attr)
-            meta[attr] = val
-        meta.description = desc
-
 def load_attrs(attrs_tab):
     """load attributes into dictionaries keyed by gene or transcript ids"""
     # columns are (id, key value)
@@ -102,9 +88,6 @@ def load_attrs(attrs_tab):
             trans_metas[row[0]][row[1]] = row[2]
     gene_metas.default_factory = None
     trans_metas.default_factory = None
-    # HACK for Ensembl
-    for gene_meta in gene_metas.values():
-        parse_painful_description(gene_meta)
     return gene_metas, trans_metas
 
 def get_name_or_id(meta, field):
